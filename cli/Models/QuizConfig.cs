@@ -6,6 +6,7 @@ public sealed record QuizConfig(
     string? TopicFilter = null,
     IReadOnlyList<string>? TopicGroup = null,
     string? TopicGroupLabel = null,
+    string? SourceFilter = null,
     bool MockMode = false,
     int? Seed = null,
     bool ShowExplanationOnCorrect = true,

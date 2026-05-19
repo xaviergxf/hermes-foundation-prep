@@ -36,6 +36,9 @@ public sealed record Question
     /// <summary>Page du manuel HERMES (Édition 2022).</summary>
     [JsonPropertyName("page")] public int Page { get; init; }
 
+    /// <summary>Source optionnelle : "exam2025" pour l'examen officiel TÜV SÜD Nov 2023.</summary>
+    [JsonPropertyName("src")] public string? Source { get; init; }
+
     public string GetOption(string key) => key.ToLowerInvariant() switch
     {
         "a" => OptionA,

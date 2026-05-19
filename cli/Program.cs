@@ -12,7 +12,7 @@ try
     var bank = new QuestionBank();
 
     // If no category filters were provided via CLI, let the user pick interactively.
-    if (!config.MockMode && config.ObjectifFilter == null && config.TopicFilter == null)
+    if (!config.MockMode && config.ObjectifFilter == null && config.TopicFilter == null && config.SourceFilter == null)
         config = PromptForCategory(bank, config);
 
     // If no count was explicitly provided (and not in mock mode), prompt the user.
@@ -56,6 +56,7 @@ static QuizConfig PromptForCategory(QuestionBank bank, QuizConfig config)
                 "Toutes les questions",
                 "Par objectif",
                 "Par thème",
+                "Examen officiel 2025 (TÜV SÜD – 40 Q authentiques)",
                 "Examen blanc (40 Q, distribution officielle 12/8/10/10)"
             ]));
 
@@ -63,6 +64,9 @@ static QuizConfig PromptForCategory(QuestionBank bank, QuizConfig config)
 
     if (mode.StartsWith("Examen blanc", StringComparison.Ordinal))
         return config with { MockMode = true, CountExplicit = true };
+
+    if (mode.StartsWith("Examen officiel", StringComparison.Ordinal))
+        return config with { SourceFilter = "exam2025", CountExplicit = true, Count = 40 };
 
     if (mode == "Par objectif")
     {
@@ -166,6 +170,7 @@ static QuizConfig ParseArgs(string[] args)
     bool countExplicit = false;
     string? obj = null;
     string? topic = null;
+    string? source = null;
     bool mock = false;
     int? seed = null;
     bool hideExplanationOnCorrect = false;
@@ -185,6 +190,11 @@ static QuizConfig ParseArgs(string[] args)
 
             case "--topic" or "-t" when i + 1 < args.Length:
                 topic = args[++i];
+                break;
+
+            case "--exam" or "-e":
+                source = "exam2025";
+                if (!countExplicit) { count = 40; countExplicit = true; }
                 break;
 
             case "--mock" or "-m":
@@ -225,6 +235,7 @@ static QuizConfig ParseArgs(string[] args)
         Count: count,
         ObjectifFilter: obj,
         TopicFilter: topic,
+        SourceFilter: source,
         MockMode: mock,
         Seed: seed,
         ShowExplanationOnCorrect: !hideExplanationOnCorrect,
@@ -243,6 +254,7 @@ static void PrintHelp()
           -c, --count N        Nombre de questions à tirer (sinon : prompt interactif)
           -o, --obj X[.Y]      Filtrer par objectif (ex. : --obj 4 ou --obj 1.3)
           -t, --topic NAME     Filtrer par topic (ex. : --topic Phases)
+          -e, --exam           Seulement les 40 questions de l'examen officiel TÜV SÜD 2025
           -m, --mock           Examen blanc 40 questions (distribution officielle 12/8/10/10)
           -s, --seed N         Graine RNG pour reproductibilité
               --terse          Ne pas afficher l'explication quand la réponse est correcte
@@ -254,6 +266,8 @@ static void PrintHelp()
           hermes-quiz --obj 4               # demande combien, sur l'Obj 4 uniquement
           hermes-quiz --obj 1.3 -c 10       # 10 questions sur Obj 1.3 (Phases), sans prompt
           hermes-quiz --topic Rôles         # demande combien, filtré par topic
+          hermes-quiz --exam                # 37 Q de l'examen officiel TÜV SÜD 2025
+          hermes-quiz --exam -c 20          # 20 Q tirées au sort parmi les 37 officielles
           hermes-quiz --mock                # examen blanc 40 Q (pas de prompt)
           hermes-quiz --mock --seed 42      # mock reproductible (utile pour comparer 2 sessions)
 

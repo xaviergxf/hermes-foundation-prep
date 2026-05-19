@@ -53,6 +53,12 @@ public sealed class QuestionBank
                 q.Objectif.StartsWith(config.ObjectifFilter + ".", StringComparison.OrdinalIgnoreCase));
         }
 
+        if (!string.IsNullOrEmpty(config.SourceFilter))
+        {
+            pool = pool.Where(q =>
+                string.Equals(q.Source, config.SourceFilter, StringComparison.OrdinalIgnoreCase));
+        }
+
         if (config.TopicGroup is { Count: > 0 } group)
         {
             pool = pool.Where(q =>
