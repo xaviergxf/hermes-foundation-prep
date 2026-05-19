@@ -57,6 +57,7 @@ static QuizConfig PromptForCategory(QuestionBank bank, QuizConfig config)
                 "Par objectif",
                 "Par thème",
                 "Examen officiel 2025 (TÜV SÜD – 40 Q authentiques)",
+                "Examen officiel 2026 (TÜV SÜD – 40 Q authentiques)",
                 "Examen blanc (40 Q, distribution officielle 12/8/10/10)"
             ]));
 
@@ -65,8 +66,11 @@ static QuizConfig PromptForCategory(QuestionBank bank, QuizConfig config)
     if (mode.StartsWith("Examen blanc", StringComparison.Ordinal))
         return config with { MockMode = true, CountExplicit = true };
 
-    if (mode.StartsWith("Examen officiel", StringComparison.Ordinal))
+    if (mode == "Examen officiel 2025 (TÜV SÜD – 40 Q authentiques)")
         return config with { SourceFilter = "exam2025", CountExplicit = true, Count = 40 };
+
+    if (mode == "Examen officiel 2026 (TÜV SÜD – 40 Q authentiques)")
+        return config with { SourceFilter = "exam2026", CountExplicit = true, Count = 40 };
 
     if (mode == "Par objectif")
     {
@@ -192,8 +196,13 @@ static QuizConfig ParseArgs(string[] args)
                 topic = args[++i];
                 break;
 
-            case "--exam" or "-e":
+            case "--exam" or "--exam2025" or "-e":
                 source = "exam2025";
+                if (!countExplicit) { count = 40; countExplicit = true; }
+                break;
+
+            case "--exam2026":
+                source = "exam2026";
                 if (!countExplicit) { count = 40; countExplicit = true; }
                 break;
 
@@ -255,6 +264,7 @@ static void PrintHelp()
           -o, --obj X[.Y]      Filtrer par objectif (ex. : --obj 4 ou --obj 1.3)
           -t, --topic NAME     Filtrer par topic (ex. : --topic Phases)
           -e, --exam           Seulement les 40 questions de l'examen officiel TÜV SÜD 2025
+              --exam2026       Seulement les 40 questions de l'examen officiel TÜV SÜD 2026
           -m, --mock           Examen blanc 40 questions (distribution officielle 12/8/10/10)
           -s, --seed N         Graine RNG pour reproductibilité
               --terse          Ne pas afficher l'explication quand la réponse est correcte
@@ -266,8 +276,9 @@ static void PrintHelp()
           hermes-quiz --obj 4               # demande combien, sur l'Obj 4 uniquement
           hermes-quiz --obj 1.3 -c 10       # 10 questions sur Obj 1.3 (Phases), sans prompt
           hermes-quiz --topic Rôles         # demande combien, filtré par topic
-          hermes-quiz --exam                # 37 Q de l'examen officiel TÜV SÜD 2025
-          hermes-quiz --exam -c 20          # 20 Q tirées au sort parmi les 37 officielles
+          hermes-quiz --exam                # 40 Q de l'examen officiel TÜV SÜD 2025
+          hermes-quiz --exam2026            # 40 Q de l'examen officiel TÜV SÜD 2026
+          hermes-quiz --exam -c 20          # 20 Q tirées au sort parmi les 40 officielles 2025
           hermes-quiz --mock                # examen blanc 40 Q (pas de prompt)
           hermes-quiz --mock --seed 42      # mock reproductible (utile pour comparer 2 sessions)
 
